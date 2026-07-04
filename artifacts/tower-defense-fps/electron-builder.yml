@@ -1,0 +1,55 @@
+appId: com.tower-defense-fps
+productName: "Tower Defense FPS"
+copyright: "Copyright © 2026"
+
+# Entry point (compiled electron main process)
+main: dist/electron/main.js
+
+# Electron version to bundle
+electronVersion: "33.4.0"
+
+directories:
+  output: dist/installer
+  buildResources: public
+
+# Files to bundle into the app
+files:
+  - dist/renderer/**
+  - dist/electron/**
+  - package.json
+
+# Windows — NSIS installer (.exe)
+win:
+  target:
+    - target: nsis
+      arch:
+        - x64
+  icon: public/favicon.ico
+
+nsis:
+  oneClick: false
+  allowToChangeInstallationDirectory: true
+  installerIcon: public/favicon.ico
+  uninstallerIcon: public/favicon.ico
+  createDesktopShortcut: always
+  createStartMenuShortcut: true
+
+# Linux — AppImage (universal, no install needed)
+linux:
+  target:
+    - target: AppImage
+      arch:
+        - x64
+  category: Game
+
+# macOS — DMG disk image
+mac:
+  target:
+    - target: dmg
+      arch:
+        - x64
+        - arm64
+  category: public.app-category.games
+
+# Don't publish to any store automatically
+publish: null
