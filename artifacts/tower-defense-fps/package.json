@@ -1,8 +1,11 @@
 {
   "name": "@workspace/tower-defense-fps",
-  "version": "0.0.0",
+  "version": "1.0.0",
+  "description": "FPS Tower Defense — Babylon.js WebGPU, 40 units, 100 enemies, 20 bosses, full gamepad",
+  "author": "debugmi530-del",
   "private": true,
   "type": "module",
+  "main": "dist/electron/main.js",
   "scripts": {
     "dev": "vite --config vite.config.ts --host 0.0.0.0",
     "build": "tsc -p tsconfig.json --noEmit && vite build --config vite.config.ts",

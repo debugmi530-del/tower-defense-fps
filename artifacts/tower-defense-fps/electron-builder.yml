@@ -2,12 +2,6 @@ appId: com.tower-defense-fps
 productName: "Tower Defense FPS"
 copyright: "Copyright © 2026"
 
-# Entry point (compiled electron main process)
-main: dist/electron/main.js
-
-# Electron version to bundle
-electronVersion: "33.4.0"
-
 directories:
   output: dist/installer
   buildResources: public
