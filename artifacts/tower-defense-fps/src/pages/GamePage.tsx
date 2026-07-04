@@ -1,4 +1,4 @@
-import { useEffect, useRef, useCallback } from 'react';
+import { useEffect, useRef, useCallback, useState } from 'react';
 import { gameController } from '../game/GameController';
 import { useGameStore } from '../store/gameStore';
 import HUD from '../components/HUD';
@@ -13,12 +13,18 @@ export default function GamePage() {
   const initialized = useRef(false);
   const phase = useGameStore((s) => s.phase);
 
+  const [webglError, setWebglError] = useState<string | null>(null);
+
   useEffect(() => {
     if (!canvasRef.current || initialized.current) return;
     initialized.current = true;
 
     gameController.init(canvasRef.current).then(() => {
       console.log('[GamePage] Engine initialized');
+    }).catch((err: unknown) => {
+      const msg = err instanceof Error ? err.message : String(err);
+      console.warn('[GamePage] Engine init failed:', msg);
+      setWebglError(msg);
     });
 
     return () => {
@@ -40,6 +46,41 @@ export default function GamePage() {
   }, []);
 
   const showHUD = phase === 'playing' || phase === 'upgrading' || phase === 'paused';
+
+  if (webglError) {
+    return (
+      <div style={{
+        width: '100vw', height: '100vh', background: '#050510',
+        display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+        fontFamily: 'system-ui, sans-serif', color: '#fff', padding: '2rem', textAlign: 'center',
+      }}>
+        <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>🎮</div>
+        <h2 style={{ fontSize: '1.5rem', fontWeight: 800, color: '#FF4444', marginBottom: '0.75rem' }}>
+          WebGL недоступен в этой среде
+        </h2>
+        <p style={{ color: '#888', maxWidth: 480, lineHeight: 1.6, marginBottom: '1.5rem' }}>
+          Babylon.js требует WebGL для 3D-рендеринга. Replit preview-iframe иногда ограничивает доступ к GPU.
+          <br />Откройте игру напрямую в браузере:
+        </p>
+        <a
+          href={window.location.href}
+          target="_blank"
+          rel="noopener noreferrer"
+          style={{
+            padding: '0.9rem 2.5rem',
+            background: 'linear-gradient(135deg, #7C3AED, #4F46E5)',
+            color: '#fff', textDecoration: 'none', borderRadius: 12,
+            fontWeight: 700, fontSize: '1rem',
+          }}
+        >
+          ↗ Открыть в новой вкладке
+        </a>
+        <div style={{ marginTop: '1rem', color: '#555', fontSize: '0.8rem' }}>
+          {webglError}
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="game-root" style={{ width: '100vw', height: '100vh', overflow: 'hidden', background: '#000', position: 'relative' }}>

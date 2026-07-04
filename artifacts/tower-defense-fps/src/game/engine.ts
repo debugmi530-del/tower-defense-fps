@@ -25,12 +25,25 @@ export interface EngineResult {
   canvas: HTMLCanvasElement;
 }
 
+function createWebGLEngine(canvas: HTMLCanvasElement): Engine {
+  console.log('[Engine] Initialising WebGL engine');
+  return new Engine(canvas, true, {
+    preserveDrawingBuffer: true,
+    stencil: true,
+    antialias: true,
+    adaptToDeviceRatio: true,
+    powerPreference: 'high-performance',
+    failIfMajorPerformanceCaveat: false,
+  });
+}
+
 export async function createEngine(canvas: HTMLCanvasElement): Promise<EngineResult> {
   let engine: Engine | WebGPUEngine;
   let isWebGPU = false;
 
   // Try WebGPU first for max performance
-  if (await WebGPUEngine.IsSupportedAsync) {
+  const gpuSupported = await WebGPUEngine.IsSupportedAsync;
+  if (gpuSupported) {
     try {
       const webgpuEngine = new WebGPUEngine(canvas, {
         antialias: true,
@@ -41,25 +54,11 @@ export async function createEngine(canvas: HTMLCanvasElement): Promise<EngineRes
       isWebGPU = true;
       console.log('[Engine] WebGPU initialized — maximum GPU performance');
     } catch (e) {
-      console.warn('[Engine] WebGPU failed, falling back to WebGL2:', e);
-      engine = new Engine(canvas, true, {
-        preserveDrawingBuffer: true,
-        stencil: true,
-        antialias: true,
-        adaptToDeviceRatio: true,
-        powerPreference: 'high-performance',
-        failIfMajorPerformanceCaveat: false,
-      });
+      console.warn('[Engine] WebGPU failed, falling back to WebGL:', e);
+      engine = createWebGLEngine(canvas);
     }
   } else {
-    engine = new Engine(canvas, true, {
-      preserveDrawingBuffer: true,
-      stencil: true,
-      antialias: true,
-      adaptToDeviceRatio: true,
-      powerPreference: 'high-performance',
-    });
-    console.log('[Engine] WebGL2 initialized');
+    engine = createWebGLEngine(canvas);
   }
 
   // Use all CPU cores: enable worker pool
