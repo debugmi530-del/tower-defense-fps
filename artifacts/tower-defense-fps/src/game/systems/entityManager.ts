@@ -1,4 +1,4 @@
-import { Scene, MeshBuilder, StandardMaterial, Color3, Vector3, Mesh, InstancedMesh, DynamicTexture, PBRMaterial } from '@babylonjs/core';
+import { Scene, MeshBuilder, Color3, Mesh, InstancedMesh, PBRMaterial } from '@babylonjs/core';
 import { ENEMIES } from '../data/enemies';
 import { BOSSES } from '../data/bosses';
 import { UNITS } from '../data/units';
@@ -215,13 +215,6 @@ export function moveBoss(dt: number): void {
   }
 }
 
-function hexToColor3(hex: string): Color3 {
-  const r = parseInt(hex.slice(1, 3), 16) / 255;
-  const g = parseInt(hex.slice(3, 5), 16) / 255;
-  const b = parseInt(hex.slice(5, 7), 16) / 255;
-  return new Color3(r, g, b);
-}
-
 export function cleanupEntityManager(): void {
   for (const mesh of activeEnemyMeshes.values()) mesh.dispose();
   for (const mesh of activeUnitMeshes.values()) mesh.dispose();
@@ -229,11 +222,4 @@ export function cleanupEntityManager(): void {
   for (const mesh of unitTemplates.values()) mesh.dispose();
   activeEnemyMeshes.clear();
   activeUnitMeshes.clear();
-}
-
-function hexToColor3(hex: string): Color3 {
-  const r = parseInt(hex.slice(1, 3), 16) / 255;
-  const g = parseInt(hex.slice(3, 5), 16) / 255;
-  const b = parseInt(hex.slice(5, 7), 16) / 255;
-  return new Color3(r, g, b);
 }

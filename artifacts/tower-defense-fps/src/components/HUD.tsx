@@ -1,5 +1,7 @@
 import { useGameStore } from '../store/gameStore';
-import { UNITS, ERA_NAMES, ERA_COLORS } from '../game/data/units';
+import { UNITS } from '../game/data/units';
+
+const ERA_COLOR_LIST = ['#8B6914', '#8B0000', '#4682B4', '#556B2F', '#708090', '#7B68EE'];
 import { UPGRADES } from '../game/data/upgrades';
 
 export default function HUD() {
@@ -150,9 +152,9 @@ export default function HUD() {
           {eraNames.map((name, i) => (
             <div key={i} style={{
               padding: '3px 8px', borderRadius: 4, fontSize: 10, fontWeight: 700,
-              background: selectedEra === i ? ERA_COLORS[Object.keys(ERA_COLORS)[i] as any] + '66' : 'rgba(255,255,255,0.05)',
+              background: selectedEra === i ? ERA_COLOR_LIST[i] + '66' : 'rgba(255,255,255,0.05)',
               color: selectedEra === i ? '#fff' : '#666',
-              border: `1px solid ${selectedEra === i ? ERA_COLORS[Object.keys(ERA_COLORS)[i] as any] : 'transparent'}`,
+              border: `1px solid ${selectedEra === i ? ERA_COLOR_LIST[i] : 'transparent'}`,
               letterSpacing: '0.05em',
             }}>
               {name.slice(0, 4)}
