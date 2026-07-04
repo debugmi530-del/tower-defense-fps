@@ -26,6 +26,7 @@ jobs:
     defaults:
       run:
         working-directory: artifacts/tower-defense-fps
+        shell: bash
 
     steps:
       - name: Checkout
@@ -41,26 +42,27 @@ jobs:
         with:
           node-version: '22'
 
-      # The root pnpm-workspace.yaml excludes all platform-specific native
-      # binaries (rollup, esbuild, etc.) to save disk space on Replit/Linux.
-      # Strip the entire overrides section so pnpm can install the correct
-      # binaries for this CI runner's platform.
+      # pnpm-workspace.yaml overrides exclude all platform-specific native
+      # binaries (rollup, esbuild, tailwindcss-oxide…) to save disk on Replit.
+      # Strip the overrides section so pnpm resolves the correct binaries for
+      # this runner's platform.
       - name: Remove platform-exclusion overrides
-        run: |
-          python3 - <<'EOF'
-          import re
-          path = 'pnpm-workspace.yaml'
-          text = open(path).read()
-          # Drop everything from the first "overrides:" line to end of file
-          text = re.sub(r'\noverrides:.*', '', text, flags=re.DOTALL)
-          open(path, 'w').write(text)
-          print("overrides section removed")
-          EOF
+        shell: bash
         working-directory: .
+        run: |
+          node -e "
+            const fs = require('fs');
+            const path = 'pnpm-workspace.yaml';
+            let text = fs.readFileSync(path, 'utf8');
+            text = text.replace(/\noverrides:[\s\S]*/, '');
+            fs.writeFileSync(path, text);
+            console.log('overrides removed');
+          "
 
       - name: Install dependencies
-        run: pnpm install --no-frozen-lockfile
+        shell: bash
         working-directory: .
+        run: pnpm install --no-frozen-lockfile
 
       - name: Build renderer + Electron main
         run: node build-electron.mjs
