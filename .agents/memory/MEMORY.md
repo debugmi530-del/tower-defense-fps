@@ -1,0 +1,1 @@
+- [Tower Defense FPS architecture](tower-defense-fps.md) — Babylon.js WebGPU game, full gamepad, 40 units/100 enemies/20 bosses; WebGL unavailable in Replit preview iframe.
