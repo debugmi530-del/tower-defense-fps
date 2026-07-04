@@ -1,0 +1,27 @@
+kind = "web"
+previewPath = "/"
+title = "Tower Defense FPS"
+version = "1.0.0"
+id = "artifacts/tower-defense-fps"
+router = "path"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 23443
+
+[services.development]
+run = "pnpm --filter @workspace/tower-defense-fps run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/tower-defense-fps", "run", "build" ]
+serve = "static"
+publicDir = "artifacts/tower-defense-fps/dist/public"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "23443"
+BASE_PATH = "/"
