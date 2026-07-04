@@ -136,9 +136,9 @@ export function updateWaveManager(dt: number): void {
     store.setActiveEnemies([...currentEnemies, ...newEnemies]);
   }
 
-  // Check if wave is complete
-  const state = store;
-  if (spawnQueue.length === 0 && state.activeEnemies.filter((e) => e.isAlive).length === 0 && !state.activeBoss) {
+  // Check if wave is complete — re-read store for fresh snapshot after spawn
+  const freshState = useGameStore.getState();
+  if (spawnQueue.length === 0 && freshState.activeEnemies.filter((e) => e.isAlive).length === 0 && !freshState.activeBoss) {
     completeWave();
   }
 }
@@ -164,15 +164,22 @@ function completeWave(): void {
     }, 1000);
   }
 
-  // Schedule next wave
-  setTimeout(() => {
-    const nextWave = store.wave.current + 1;
-    if (nextWave > 100) {
-      useGameStore.getState().setPhase('victory');
-    } else {
-      useGameStore.getState().setPhase('waveAnnounce');
-    }
-  }, 15000);
+  // Schedule next wave — starts automatically after inter-wave delay
+  const currentWaveNum = store.wave.current;
+  const nextWave = currentWaveNum + 1;
+  if (nextWave > 100) {
+    setTimeout(() => useGameStore.getState().setPhase('victory'), 2000);
+  } else {
+    const delay = store.wave.current % 5 === 0 ? 20000 : 12000; // longer pause after boss/upgrade
+    setTimeout(() => {
+      const s = useGameStore.getState();
+      if (s.phase === 'playing' || s.phase === 'upgrading') {
+        s.setWave({ current: nextWave, enemiesLeft: 0, enemiesTotal: 0, isBossWave: nextWave % 5 === 0, timeToNext: 0 });
+        startWave(nextWave);
+        s.setPhase('playing');
+      }
+    }, delay);
+  }
 }
 
 export function spawnBoss(bossDefId: number): void {

@@ -39,11 +39,12 @@ export function updateCombat(dt: number): void {
     const damage = def.damage * unitDamageMultiplier;
     const rangeSq = def.range * def.range;
 
-    // Find nearest target
+    // Find nearest STILL-alive target (re-check updatedEnemies to avoid duplicate kills)
     let bestTarget: ActiveEnemy | null = null;
     let bestDistSq = Infinity;
 
-    for (const enemy of aliveEnemies) {
+    for (const enemy of updatedEnemies) {
+      if (!enemy.isAlive) continue;
       const dx = enemy.x - unit.x;
       const dz = enemy.z - unit.z;
       const distSq = dx * dx + dz * dz;
@@ -118,27 +119,28 @@ export function updateCombat(dt: number): void {
     }
   }
 
-  // Apply results
-  if (killedIds.length > 0 || bossKilled) {
+  // Always flush enemy HP changes (even non-lethal damage)
+  const enemiesChanged = updatedEnemies.some((e, i) => e.hp !== activeEnemies[i]?.hp || e.isAlive !== activeEnemies[i]?.isAlive);
+  if (enemiesChanged) {
     store.setActiveEnemies(updatedEnemies);
-    if (bossKilled) {
-      store.setActiveBoss(null);
-    } else if (updatedBoss !== activeBoss) {
-      store.setActiveBoss(updatedBoss);
-    }
+  }
 
-    for (const id of killedIds) {
-      store.addKill(0, false); // reward handled separately
+  if (bossKilled) {
+    store.setActiveBoss(null);
+  } else if (updatedBoss !== activeBoss) {
+    store.setActiveBoss(updatedBoss);
+  }
+
+  if (killedIds.length > 0 || bossKilled) {
+    for (const _id of killedIds) {
+      store.addKill(0, false);
     }
     if (bossKilled) store.addKill(0, true);
     if (totalReward > 0) store.addGold(totalReward);
 
-    // Update wave counter
     const deadCount = killedIds.length + (bossKilled ? 1 : 0);
     const current = useGameStore.getState().wave;
     store.setWave({ enemiesLeft: Math.max(0, current.enemiesLeft - deadCount) });
-  } else if (updatedBoss !== activeBoss) {
-    store.setActiveBoss(updatedBoss);
   }
 }
 

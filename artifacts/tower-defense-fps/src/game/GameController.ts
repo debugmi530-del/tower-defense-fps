@@ -1,8 +1,4 @@
-import {
-  Scene, UniversalCamera, Vector3, KeyboardEventTypes,
-  MeshBuilder, PBRMaterial, Color3, PointerEventTypes,
-  ParticleSystem, Texture, Color4, Mesh, Ray,
-} from '@babylonjs/core';
+import { Scene, UniversalCamera, Vector3 } from '@babylonjs/core';
 import { createEngine, buildArena, EngineResult } from './engine';
 import { pollGamepad, BTN } from './gamepad';
 import { useGameStore } from '../store/gameStore';
@@ -58,6 +54,9 @@ export class GameController {
       const store = useGameStore.getState();
       if (store.phase === 'playing') {
         this.tick(dt, scene);
+      } else {
+        // Always handle Start/B for pause/resume regardless of phase
+        this.handleMenuInput();
       }
 
       scene.render();
@@ -304,6 +303,30 @@ export class GameController {
 
     store.setActiveUnits([...activeUnits, unit]);
     store.addNotification(`Развёрнут: ${def.name}`, 'info');
+  }
+
+  /** Handle gamepad buttons even when not in 'playing' phase */
+  private handleMenuInput(): void {
+    const gp = pollGamepad();
+    if (!gp.connected) return;
+    const store = useGameStore.getState();
+
+    const startPressed = gp.buttons[BTN.START] && !this.prevStart;
+    const bPressed = gp.buttons[BTN.B] && !this.prevB;
+
+    if (store.phase === 'paused' && startPressed) {
+      store.setPhase('playing');
+    }
+    if (store.phase === 'upgrading' && bPressed) {
+      store.setPhase('playing');
+    }
+    if (store.phase === 'gameover' && startPressed) {
+      store.resetGame();
+      setTimeout(() => this.startGame(), 100);
+    }
+
+    this.prevStart = gp.buttons[BTN.START];
+    this.prevB = gp.buttons[BTN.B];
   }
 
   resumeGame(): void {

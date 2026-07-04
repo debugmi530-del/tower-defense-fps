@@ -101,9 +101,9 @@ export async function createEngine(canvas: HTMLCanvasElement): Promise<EngineRes
   scene.autoClearDepthAndStencil = false;
   scene.skipPointerMovePicking = true;
   scene.blockMaterialDirtyMechanism = false;
-  scene.useGeometryIdsMap = true;
-  scene.useMaterialMeshMap = true;
-  scene.useClonedMeshMap = true;
+  // Performance hints (Babylon.js v6+ scene flags)
+  scene.skipPointerMovePicking = true;
+  scene.autoClearDepthAndStencil = false;
 
   return { engine, scene, shadowGenerator, canvas };
 }
